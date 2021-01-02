@@ -93,18 +93,15 @@ private:
 				orient = m_normalized_dataset[idx_above].y * m_normalized_dataset[idx_below].x
 						- m_normalized_dataset[idx_above].x * m_normalized_dataset[idx_below].y;
 
-			if (orient == 0) //colinear
-					{
+			if (orient == 0) {  //colinear
 				idx_above++;
 				idx_below++; // don't need to change the counts
-			} else if (orient < 0) //idx_above,o,idx_below is a right turn
-					{
+			} else if (orient < 0) {  //idx_above,o,idx_below is a right turn
 				idx_below++;
 				count_r--;
 				count_l++;
 				depth = std::min(depth, count_r); //update depth
-			} else // idx_above,o,idx_below is a left turn
-			{
+			} else {  // idx_above,o,idx_below is a left turn
 				idx_above++;
 				count_r++;
 				count_l--;
@@ -175,7 +172,7 @@ private:
 			}
 		}
 
-		m_normalized_dataset.resize(i);  // remove redunt points.
+		m_normalized_dataset.resize(i);  // remove redundant points.
 
 		return point_num - i;
 	}
@@ -187,10 +184,6 @@ public:
 			m_dataset(dataset) {
 	}
 	virtual ~SortAndScan() {
-	}
-
-	void readFile(const char *inputFile) {
-
 	}
 
 	/* Function to compute the depth for one point
