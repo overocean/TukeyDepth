@@ -1,8 +1,7 @@
 /*
- * SortAndScan.h
- *
- *  Created on: Jan 1, 2021
- *      Author: dan
+ * SortAndScan is an algorithm for Tukey depth in 2D. Time complexity is bounded
+ * by the std::sort. SortAndScan is a template class, so you can use the data type
+ * of your choice.
  */
 
 #ifndef SORTANDSCAN_H_
@@ -20,6 +19,58 @@ struct Point2D {
 
 template<typename DataType>
 class SortAndScan {
+public:
+	SortAndScan() {
+	}
+	/* Use this constructor if storing the data set in the class is preferred.
+	 * @param dataset the data set to compute depth with.
+	 */
+	SortAndScan(const std::vector<Point2D<DataType>> &dataset) :
+			m_dataset(dataset) {
+	}
+	virtual ~SortAndScan() {
+	}
+
+	/* Function to compute the depth for a point.
+	 * @param index the index of the point in the data set.
+	 * @return the depth of the point with respect to the other points
+	 * in the data set.
+	 */
+	std::size_t depth(std::size_t index) {
+		return depth(m_dataset, index);
+	}
+
+	/* Function to compute the depth for a point.
+	 * @param dataset the data set to compute depth with.
+	 * @param index the index of the point in the data set.
+	 * @return the depth of the point with respect to the other points
+	 * in the data set.
+	 */
+	std::size_t depth(const std::vector<Point2D<DataType>> &dataset,
+			std::size_t index) {
+		normalizeDataset(dataset, index);
+		return depthOfOrigin();
+	}
+
+	/* Function to compute the depth for a point.
+	 * @param p the point to compute depth for.
+	 * @return the depth of the point with respect to the data set.
+	 */
+	std::size_t depth(Point2D<DataType> &p) {
+		return depth(m_dataset, p);
+	}
+
+	/* Function to compute the depth for a point.
+	 * @param dataset the data set to compute depth with.
+	 * @param p the point to compute depth for.
+	 * @return the depth of the point with respect to the data set.
+	 */
+	std::size_t depth(const std::vector<Point2D<DataType>> &dataset,
+			Point2D<DataType> &p) {
+		normalizeDataset(dataset, p);
+		return depthOfOrigin();
+	}
+
 private:
 	std::vector<Point2D<DataType>> m_dataset;
 	std::vector<Point2D<DataType>> m_normalized_dataset;
@@ -175,36 +226,6 @@ private:
 		m_normalized_dataset.resize(i);  // remove redundant points.
 
 		return point_num - i;
-	}
-
-public:
-	SortAndScan() {
-	}
-	SortAndScan(const std::vector<Point2D<DataType>> &dataset) :
-			m_dataset(dataset) {
-	}
-	virtual ~SortAndScan() {
-	}
-
-	/* Function to compute the depth for one point
-	 * the parameter is the point to compute depth for
-	 */
-	std::size_t depth(std::size_t index) {
-		return depth(m_dataset, index);
-	}
-	std::size_t depth(const std::vector<Point2D<DataType>> &dataset,
-			std::size_t index) {
-		normalizeDataset(dataset, index);
-		return depthOfOrigin();
-	}
-
-	std::size_t depth(Point2D<DataType> &p) {
-		return depth(m_dataset, p);
-	}
-	std::size_t depth(const std::vector<Point2D<DataType>> &dataset,
-			Point2D<DataType> &p) {
-		normalizeDataset(dataset, p);
-		return depthOfOrigin();
 	}
 
 };
