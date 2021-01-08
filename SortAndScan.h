@@ -12,11 +12,19 @@
 
 namespace TD {
 
+/*
+ * Structure to store a 2D point.
+ * @tparam DataType type for coordinates of the points.
+ */
 template<typename DataType>
 struct Point2D {
 	DataType x, y;
 };
 
+/*
+ * A sort and scan algorithm for Tukey depth in 2D.
+ * @tparam DataType type for coordinates of the points
+ */
 template<typename DataType>
 class SortAndScan {
 public:
