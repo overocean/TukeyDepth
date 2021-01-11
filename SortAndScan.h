@@ -12,6 +12,8 @@
 
 namespace TD {
 
+typedef std::size_t SizeType;
+
 /*
  * Structure to store a 2D point.
  * @tparam DataType type for coordinates of the points.
@@ -27,6 +29,7 @@ struct Point2D {
  */
 template<typename DataType>
 class SortAndScan {
+
 public:
 	SortAndScan() {
 	}
@@ -44,7 +47,7 @@ public:
 	 * @return the depth of the point with respect to the other points
 	 *  in the data set.
 	 */
-	std::size_t depth(const std::size_t index) {
+	SizeType depth(const SizeType index) {
 		return depth(m_dataset, index);
 	}
 
@@ -54,8 +57,8 @@ public:
 	 * @return the depth of the point with respect to the other points
 	 *  in the data set.
 	 */
-	std::size_t depth(const std::vector<Point2D<DataType>> &dataset,
-			const std::size_t index) {
+	SizeType depth(const std::vector<Point2D<DataType>> &dataset,
+			const SizeType index) {
 		normalizeDataset(dataset, index);
 		return depthOfOrigin();
 	}
@@ -64,7 +67,7 @@ public:
 	 * @param p the point to compute depth for.
 	 * @return the depth of the point with respect to the data set.
 	 */
-	std::size_t depth(const Point2D<DataType> &p) {
+	SizeType depth(const Point2D<DataType> &p) {
 		return depth(m_dataset, p);
 	}
 
@@ -73,7 +76,7 @@ public:
 	 * @param p the point to compute depth for.
 	 * @return the depth of the point with respect to the data set.
 	 */
-	std::size_t depth(const std::vector<Point2D<DataType>> &dataset,
+	SizeType depth(const std::vector<Point2D<DataType>> &dataset,
 			const Point2D<DataType> &p) {
 		normalizeDataset(dataset, p);
 		return depthOfOrigin();
@@ -98,20 +101,20 @@ private:
 		}
 	}
 
-	std::size_t depthOfOrigin() {
-		std::size_t num_origins = remove_origin_points();
+	SizeType depthOfOrigin() {
+		SizeType num_origins = remove_origin_points();
 
-		std::size_t point_num = m_normalized_dataset.size();
+		SizeType point_num = m_normalized_dataset.size();
 
 		// sort the data
 		std::sort(m_normalized_dataset.begin(), m_normalized_dataset.end(), point2d_less);
 
 		// scan the data. We will sweep the x-axis counterclockwise
-		std::size_t num_above = 0;  // number of points above the x-axis
+		SizeType num_above = 0;  // number of points above the x-axis
 
 		// Count the number of points that are above and under the x-axis. Points that are on the positive x-axis
 		// are counted as above, and the ones on the negative x-axis are counted as below.
-		for (std::size_t i = 0; i < point_num; i++) {
+		for (SizeType i = 0; i < point_num; i++) {
 			if (m_normalized_dataset[i].y > 0) //above x-axis
 				num_above++;
 			else if (m_normalized_dataset[i].x > 0 && m_normalized_dataset[i].y == 0) //on the positive x-axis
@@ -120,18 +123,18 @@ private:
 				// counting is done
 				break;
 		}
-		std::size_t num_below = point_num - num_above;  // number of points above the x-axis
+		SizeType num_below = point_num - num_above;  // number of points above the x-axis
 		if (num_above == 0 || num_below == 0) {
 			return num_origins;  // the depth is the value of num_origins.
 		}
 
 		// Start to scan
-		std::size_t count_l = num_above; //count the number of points on the left of the positive x-axis
-		std::size_t count_r = num_below; //count the number of points on the right of the positive x-axis
-		std::size_t idx_above = 0;
-		std::size_t idx_below = num_above;
+		SizeType count_l = num_above; //count the number of points on the left of the positive x-axis
+		SizeType count_r = num_below; //count the number of points on the right of the positive x-axis
+		SizeType idx_above = 0;
+		SizeType idx_below = num_above;
 		DataType orient;
-		std::size_t depth = std::min(count_l, count_r); //upper bound of the depth
+		SizeType depth = std::min(count_l, count_r); //upper bound of the depth
 		while (idx_above < num_above || idx_below < point_num) {
 			if (idx_above == num_above) {  // no more points in num_above
 				count_r -= point_num - idx_below;  // those in num_below haven't been sweep can be ignored for count_r;
@@ -168,23 +171,23 @@ private:
 		return depth + num_origins;  // the duplication is counted for the depth
 	}
 
-	void normalizeDataset(const std::vector<Point2D<DataType>> &dataset, const std::size_t index) {
+	void normalizeDataset(const std::vector<Point2D<DataType>> &dataset, const SizeType index) {
 		if (index >= dataset.size()) {
 			throw std::runtime_error(
 					std::string("Index ") + std::to_string(index) + " is out of bound.");
 		}
 
 		// make point at index the origin of the data set
-		std::size_t pointnum = dataset.size() - 1;
-		m_normalized_dataset.resize(pointnum);
+		SizeType point_num = dataset.size() - 1;
+		m_normalized_dataset.resize(point_num);
 		DataType x = dataset[index].x;
 		DataType y = dataset[index].y;
 
-		for (int i = 0; i < index; i++) {
+		for (SizeType i = 0; i < index; i++) {
 			m_normalized_dataset[i].x = dataset[i].x - x;
 			m_normalized_dataset[i].y = dataset[i].y - y;
 		}
-		for (int i = index + 1; i <= pointnum; i++) {
+		for (SizeType i = index + 1; i <= point_num; i++) {
 			m_normalized_dataset[i - 1].x = dataset[i].x - x;
 			m_normalized_dataset[i - 1].y = dataset[i].y - y;
 		}
@@ -193,25 +196,25 @@ private:
 	void normalizeDataset(const std::vector<Point2D<DataType>> &dataset, const Point2D<DataType> &p) {
 
 		// make p the origin of the data set
-		std::size_t point_num = dataset.size();
+		SizeType point_num = dataset.size();
 		m_normalized_dataset.resize(point_num);
 		DataType x = p.x;
 		DataType y = p.y;
 
-		for (int i = 0; i < point_num; i++) {
+		for (SizeType i = 0; i < point_num; i++) {
 			m_normalized_dataset[i].x = dataset[i].x - x;
 			m_normalized_dataset[i].y = dataset[i].y - y;
 		}
 	}
 
-	std::size_t remove_origin_points() {
-		std::size_t point_num = m_normalized_dataset.size();
-		std::size_t i = 0;
+	SizeType remove_origin_points() {
+		SizeType point_num = m_normalized_dataset.size();
+		SizeType i = 0;
 		while (i < point_num && (m_normalized_dataset[i].x != 0 || m_normalized_dataset[i].y != 0)) {
 			i++;
 		}
 
-		for (std::size_t j = i; j < point_num; j++) {  // the jth point can be a zero point
+		for (SizeType j = i; j < point_num; j++) {  // the jth point can be a zero point
 			while (j < point_num && m_normalized_dataset[j].x == 0 && m_normalized_dataset[j].y == 0) {  //find the fist non-zero
 				j++;
 			}
