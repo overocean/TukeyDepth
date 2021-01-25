@@ -71,7 +71,7 @@ public:
 			throw std::runtime_error("Incorrect value for parameter k.");
 		}
 
-		if (k > 2 && solver == nullptr) {
+		if (k > 1 && solver == nullptr) {
 			throw std::runtime_error("A solver for k-dimensional problem is required.");
 		}
 
