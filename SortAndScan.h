@@ -10,9 +10,9 @@
 #include <vector>
 #include <algorithm>
 
-namespace TD {
+#include "types.h"
 
-typedef std::size_t SizeType;
+namespace TD {
 
 /*
  * Structure to store a 2D point.
@@ -57,8 +57,21 @@ public:
 	 * @return the depth of the point with respect to the other points
 	 *  in the data set.
 	 */
-	SizeType depth(const std::vector<Point2D<DataType>> &dataset,
-			const SizeType index) {
+	SizeType depth(const std::vector<Point2D<DataType>> &dataset, const SizeType index) {
+		normalizeDataset(dataset, index);
+		return depthOfOrigin();
+	}
+
+	/* Operator to compute the depth for a point.
+	 * @param dataset the data set to compute depth with.
+	 * @param index the index of the point in the data set.
+	 * @return the depth of the point with respect to the other points
+	 *  in the data set.
+	 */
+	SizeType operator()(const PointSet<DataType> &dataset, const SizeType index) {
+		if (dataset.m_dim != 2) {
+			throw std::runtime_error("SortAndScan is designated for data in 2d.");
+		}
 		normalizeDataset(dataset, index);
 		return depthOfOrigin();
 	}
@@ -174,7 +187,7 @@ private:
 	void normalizeDataset(const std::vector<Point2D<DataType>> &dataset, const SizeType index) {
 		if (index >= dataset.size()) {
 			throw std::runtime_error(
-					std::string("Index ") + std::to_string(index) + " is out of bound.");
+				std::string("SortAndScan: Index ") + std::to_string(index) + " is out of bound.");
 		}
 
 		// make point at index the origin of the data set
@@ -190,6 +203,30 @@ private:
 		for (SizeType i = index + 1; i <= point_num; i++) {
 			m_normalized_dataset[i - 1].x = dataset[i].x - x;
 			m_normalized_dataset[i - 1].y = dataset[i].y - y;
+		}
+	}
+
+	void normalizeDataset(const PointSet<DataType> &dataset, const SizeType index) {
+		if (index >= dataset.m_point_num) {
+			throw std::runtime_error(
+				std::string("SortAndScan: Index ") + std::to_string(index) + " is out of bound.");
+		}
+
+		const DataType *data = dataset.m_data;
+
+		// make point at index the origin of the data set
+		SizeType point_num = dataset.m_point_num - 1;
+		m_normalized_dataset.resize(point_num);
+		DataType x = *(data + index * 2);
+		DataType y = *(data + index * 2 + 1);
+
+		for (SizeType i = 0; i < index; i++) {
+			m_normalized_dataset[i].x = *(data + i * 2) - x;
+			m_normalized_dataset[i].y = *(data + i * 2 + 1) - y;
+		}
+		for (SizeType i = index + 1; i <= point_num; i++) {
+			m_normalized_dataset[i - 1].x = *(data + i * 2) - x;
+			m_normalized_dataset[i - 1].y = *(data + i * 2 + 1) - y;
 		}
 	}
 
