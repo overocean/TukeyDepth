@@ -1,9 +1,3 @@
-/*
- * SortAndScan is an algorithm for Tukey depth in 2D. Time complexity is bounded
- * by the std::sort. SortAndScan is a template class, so you can use the data type
- * of your choice.
- */
-
 #ifndef SORTANDSCAN_H_
 #define SORTANDSCAN_H_
 
@@ -24,7 +18,9 @@ struct Point2D {
 };
 
 /*
- * A sort and scan algorithm for Tukey depth in 2D.
+ * SortAndScan is an algorithm for Tukey depth in 2D. Time complexity is bounded
+ * by the std::sort. SortAndScan is a template class, so you can use the data type
+ * of your choice.
  * @tparam DataType type for coordinates of the points
  */
 template<typename DataType>

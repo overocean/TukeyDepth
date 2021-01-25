@@ -1,7 +1,3 @@
-/*
- * This is an implementation of the approximation algorithms in
- */
-
 #ifndef ABSOLUTEAPX_H_
 #define ABSOLUTEAPX_H_
 
@@ -23,7 +19,7 @@ namespace TD {
 
 /*
  * A Monte Carlo approximation algorithm for Tukey depth in arbitrary dimension.
- * This approximation has an absolute performance guarantee or bounded error
+ * This approximation has an absolute performance guarantee of bounded error
  * with probability no less than (1 - 1/e).
  * @warning the points in the data set need to be in general position.
  * @tparam DataType type for coordinates of the points in DataInfo
@@ -214,7 +210,7 @@ private:
 			}
 		}
 
-		// The d-k points should not be counted for the depth value, since we can perturb
+		// The last d-k points should not be counted for the depth value, since we can perturb
 		// the halfspace a little bit to exclude those points from the halfspace.
 		auto itr = sample_point_set.begin();
 		for (int i = 1; i < k; ++i) {
@@ -261,57 +257,61 @@ private:
 		return prod;
 	}
 
+	/*
+	 * Function to find k vectors that are orthogonal to the (d-k) flat defined by p and last d-k points
+	 * in sample_point_set. The result k vectors are orthogonal to each other too.
+	 */
 	bool getNormalVectors(const SizeType p, const std::unordered_set<SizeType>& sample_point_set,
-			std::vector<Eigen::Matrix<PrecisionType, Eigen::Dynamic, 1>>& result) const {
+		std::vector<Eigen::Matrix<PrecisionType, Eigen::Dynamic, 1>>& result) const {
 
-			Eigen::Matrix<PrecisionType, Eigen::Dynamic, Eigen::Dynamic> mat;
-			mat.resize(m_dim, m_dim);
-			Eigen::Matrix<PrecisionType, Eigen::Dynamic, 1> rhs;
-			rhs.resize(m_dim);
+		Eigen::Matrix<PrecisionType, Eigen::Dynamic, Eigen::Dynamic> mat;
+		mat.resize(m_dim, m_dim);
+		Eigen::Matrix<PrecisionType, Eigen::Dynamic, 1> rhs;
+		rhs.resize(m_dim);
 
-			//The first equation is like 'x1 + x2 + ... + xd = d'
-			for (SizeType i = 0; i < m_dim; ++i)
-			{
-				mat(0, i) = 1;
-				rhs(i, 0) = 0;
-			}
-			rhs(0, 0) = m_dim;  // can cause overflow?
-
-			//equation i is like '(a_i^1 -a_0^1)*x1 + (a_i^2 -a_0^2)*x2 + ... + (a_i^d -a_0^d)*xd = 0'
-			SizeType i = 1;
-			for (auto itr = sample_point_set.begin(); itr != sample_point_set.end(); ++itr) {
-				SizeType cur_point = *itr;
-				if (cur_point != p) {
-					for (SizeType j = 0; j < m_dim; ++j) {
-						mat(i, j) = m_data[cur_point * m_dim + j] - m_data[p * m_dim + j];
-					}
-					++i;
-				}
-			}
-
-			SizeType vector_num = result.size();
-			for (SizeType i = 0; i < vector_num; ++i) {
-				//if (std::is_floating_point<PrecisionType>::value) {
-				//	result[i] = mat.fullPivLu().solve(rhs);
-				//} else {
-				//	result[i] = mat.householderQr().solve(rhs);  // this seems having bad precision
-				//}
-				result[i] = mat.fullPivLu().solve(rhs);
-
-				if (!rhs.isApprox(mat*result[i])) {
-					return false;
-				}
-
-				if (i + 1 == vector_num) break;
-
-				//replace one point with the new vector
-				for (SizeType j = 0; j < m_dim; ++j) {
-					mat(i + 1, j) = result[i](j, 0);
-				}
-			}
-
-			return true;
+		//The first equation is like 'x1 + x2 + ... + xd = d'
+		for (SizeType i = 0; i < m_dim; ++i) {
+			mat(0, i) = 1;
+			rhs(i, 0) = 0;
 		}
+		rhs(0, 0) = m_dim;  // can cause overflow?
+
+		//equation i is like '(a_i^1 -a_p^1)*x1 + (a_i^2 -a_p^2)*x2 + ... + (a_i^d -a_p^d)*xd = 0'
+		SizeType i = 1;
+		for (auto itr = sample_point_set.begin(); itr != sample_point_set.end(); ++itr) {
+			SizeType cur_point = *itr;
+			if (cur_point != p) {
+				for (SizeType j = 0; j < m_dim; ++j) {
+					mat(i, j) = m_data[cur_point * m_dim + j] - m_data[p * m_dim + j];
+				}
+				++i;
+			}
+		}
+
+		SizeType vector_num = result.size();
+		for (SizeType i = 0; i < vector_num; ++i) {
+			//if (std::is_floating_point<PrecisionType>::value) {
+			//	result[i] = mat.fullPivLu().solve(rhs);
+			//} else {
+			//	result[i] = mat.householderQr().solve(rhs);  // this seems having bad precision
+			//}
+			result[i] = mat.fullPivLu().solve(rhs);  // find the ith vector
+
+			if (!rhs.isApprox(mat * result[i])) {
+				return false;
+			}
+
+			if (i + 1 == vector_num)
+				break;
+
+			//replace one point with the new vector
+			for (SizeType j = 0; j < m_dim; ++j) {
+				mat(i + 1, j) = result[i](j, 0);
+			}
+		}
+
+		return true;
+	}
 
 	/* Function to compute the number of sampling such that the error is less
 	 * than sigma with probability no less than (1 - 1/e).

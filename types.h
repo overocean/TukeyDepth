@@ -1,13 +1,5 @@
-/*
- * types.h
- *
- *  Created on: Jan 24, 2021
- *      Author: dan
- */
-
 #ifndef TYPES_H_
 #define TYPES_H_
-
 
 namespace TD {
 
