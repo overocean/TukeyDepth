@@ -188,21 +188,22 @@ private:
 			sample_point_set.clear();
 			sample_point_set.insert(p);
 			randomSample(thread_id, distrib, sample_point_set);
+			sample_point_set.erase(p);
 			++sample_counter;
 		} while (!getNormalVectors(p, sample_point_set, vectors));
 
 		SizeType projected_point_num = m_point_num - m_dim + k;
 		std::vector<PrecisionType> data_set(projected_point_num * k);
 
-		//mapping p to the k-flat
+		//mapping p to the k-flat. Since p is the origin in the new space, we just initialize it directly.
 		for (int i = 0; i < k; ++i) {
-			data_set[i] = innerProduct(vectors[i], m_data + p * m_dim);
+			data_set[i] = 0;  // innerProduct(vectors[i], m_data + p * m_dim) == 0
 		}
 
-		//mapping S (exclude sample_point_set) to the k-flat
+		//mapping S (exclude sample_point_set and p) to the k-flat
 		SizeType idx = k;
 		for (SizeType i = 0; i < m_point_num; ++i) {
-			if (sample_point_set.count(i) == 0) {
+			if (i != p && sample_point_set.count(i) == 0) {
 				for (int j = 0; j < k; ++j) {
 					data_set[idx] = innerProduct(vectors[j], m_data + i * m_dim);
 					++idx;
@@ -279,13 +280,10 @@ private:
 		//equation i is like '(a_i^1 -a_p^1)*x1 + (a_i^2 -a_p^2)*x2 + ... + (a_i^d -a_p^d)*xd = 0'
 		SizeType i = 1;
 		for (auto itr = sample_point_set.begin(); itr != sample_point_set.end(); ++itr) {
-			SizeType cur_point = *itr;
-			if (cur_point != p) {
-				for (SizeType j = 0; j < m_dim; ++j) {
-					mat(i, j) = m_data[cur_point * m_dim + j] - m_data[p * m_dim + j];
-				}
-				++i;
+			for (SizeType j = 0; j < m_dim; ++j) {
+				mat(i, j) = m_data[*itr * m_dim + j] - m_data[p * m_dim + j];
 			}
+			++i;
 		}
 
 		SizeType vector_num = result.size();
