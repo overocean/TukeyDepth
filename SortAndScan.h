@@ -27,25 +27,6 @@ template<typename DataType>
 class SortAndScan {
 
 public:
-	SortAndScan() {
-	}
-	/* Use this constructor if storing the data set in the class is preferred.
-	 * @param dataset the data set to compute depth with.
-	 */
-	SortAndScan(const std::vector<Point2D<DataType>> &dataset) :
-			m_dataset(dataset) {
-	}
-	virtual ~SortAndScan() {
-	}
-
-	/* Function to compute the depth for a point.
-	 * @param index the index of the point in the data set.
-	 * @return the depth of the point with respect to the other points
-	 *  in the data set.
-	 */
-	SizeType depth(const SizeType index) {
-		return depth(m_dataset, index);
-	}
 
 	/* Function to compute the depth for a point.
 	 * @param dataset the data set to compute depth with.
@@ -73,14 +54,6 @@ public:
 	}
 
 	/* Function to compute the depth for a point.
-	 * @param p the point to compute depth for.
-	 * @return the depth of the point with respect to the data set.
-	 */
-	SizeType depth(const Point2D<DataType> &p) {
-		return depth(m_dataset, p);
-	}
-
-	/* Function to compute the depth for a point.
 	 * @param dataset the data set to compute depth with.
 	 * @param p the point to compute depth for.
 	 * @return the depth of the point with respect to the data set.
@@ -92,7 +65,6 @@ public:
 	}
 
 private:
-	std::vector<Point2D<DataType>> m_dataset;
 	std::vector<Point2D<DataType>> m_normalized_dataset;
 
 	/* Compare two points pointed to by a and b using the convention that a < b
