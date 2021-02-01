@@ -195,9 +195,9 @@ private:
 		SizeType projected_point_num = m_point_num - m_dim + k;
 		std::vector<PrecisionType> data_set(projected_point_num * k);
 
-		//mapping p to the k-flat. Since p is the origin in the new space, we just initialize it directly.
+		//mapping p to the k-flat.
 		for (int i = 0; i < k; ++i) {
-			data_set[i] = 0;  // innerProduct(vectors[i], m_data + p * m_dim) == 0
+			data_set[i] = innerProduct(vectors[i], m_data + p * m_dim);
 		}
 
 		//mapping S (exclude sample_point_set and p) to the k-flat
