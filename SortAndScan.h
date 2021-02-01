@@ -28,9 +28,9 @@ class SortAndScan {
 
 public:
 
-	/* Function to compute the depth for a point.
+	/* Function to compute the depth for a point with respect to the other points in the data set.
 	 * @param dataset the data set to compute depth with.
-	 * @param index the index of the point in the data set.
+	 * @param index the index of the point in the data set (this point is not counted for its depth value).
 	 * @return the depth of the point with respect to the other points
 	 *  in the data set.
 	 */
@@ -39,9 +39,9 @@ public:
 		return depthOfOrigin();
 	}
 
-	/* Operator to compute the depth for a point.
+	/* Operator to compute the depth for a point with respect to the other points in the data set.
 	 * @param dataset the data set to compute depth with.
-	 * @param index the index of the point in the data set.
+	 * @param index the index of the point in the data set (this point is not counted for its depth value).
 	 * @return the depth of the point with respect to the other points
 	 *  in the data set.
 	 */
@@ -195,6 +195,7 @@ private:
 		for (SizeType i = index + 1; i <= point_num; i++) {
 			m_normalized_dataset[i - 1].x = *(data + i * 2) - x;
 			m_normalized_dataset[i - 1].y = *(data + i * 2 + 1) - y;
+		    //std::cout << "x: " << m_normalized_dataset[i - 1].x << ", y: " << m_normalized_dataset[i - 1].y << std::endl;
 		}
 	}
 
