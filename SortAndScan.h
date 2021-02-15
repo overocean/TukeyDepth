@@ -70,7 +70,7 @@ private:
 	/* Compare two points pointed to by a and b using the convention that a < b
 	 * iff a is hit first when rotating the positive x-axis counterclockwise
 	 */
-	static bool point2d_less(const Point2D<DataType> &a, const Point2D<DataType> &b) {
+	static bool point2d_lessthan(const Point2D<DataType> &a, const Point2D<DataType> &b) {
 		if (b.y == 0 && b.x > 0) {  // b is on the positive x-axis
 			return false;
 		} else if (a.y == 0 && a.x > 0) {  // only a is on the positive x-axis
@@ -88,49 +88,43 @@ private:
 		SizeType point_num = m_normalized_dataset.size();
 
 		// sort the data
-		std::sort(m_normalized_dataset.begin(), m_normalized_dataset.end(), point2d_less);
+		std::sort(m_normalized_dataset.begin(), m_normalized_dataset.end(), point2d_lessthan);
 
-		// scan the data. We will sweep the x-axis counterclockwise
+		// when scanning the data, we will sweep the x-axis counterclockwise
 		SizeType num_above = 0;  // number of points above the x-axis
 
 		// Count the number of points that are above and under the x-axis. Points that are on the positive x-axis
 		// are counted as above, and the ones on the negative x-axis are counted as below.
 		for (SizeType i = 0; i < point_num; i++) {
-			if (m_normalized_dataset[i].y > 0) //above x-axis
+			if (m_normalized_dataset[i].y > 0)  // above x-axis
 				num_above++;
-			else if (m_normalized_dataset[i].x > 0 && m_normalized_dataset[i].y == 0) //on the positive x-axis
+			else if (m_normalized_dataset[i].x > 0 && m_normalized_dataset[i].y == 0)  // on the positive x-axis
 				num_above++;
 			else
 				// counting is done
 				break;
 		}
 		SizeType num_below = point_num - num_above;  // number of points above the x-axis
-		if (num_above == 0 || num_below == 0) {
-			return num_origins;  // the depth is the value of num_origins.
-		}
 
 		// Start to scan
-		SizeType count_l = num_above; //count the number of points on the left of the positive x-axis
-		SizeType count_r = num_below; //count the number of points on the right of the positive x-axis
+		SizeType count_l = num_above;  // count the number of points on the left of the positive x-axis
+		SizeType count_r = num_below;  // count the number of points on the right of the positive x-axis
 		SizeType idx_above = 0;
 		SizeType idx_below = num_above;
-		DataType orient;
-		SizeType depth = std::min(count_l, count_r); //upper bound of the depth
-		while (idx_above < num_above || idx_below < point_num) {
+		SizeType depth = std::min(count_l, count_r);  // upper bound of the depth
+		while (depth > 0 && (idx_above < num_above || idx_below < point_num)) {
 			if (idx_above == num_above) {  // no more points in num_above
-				count_r -= point_num - idx_below;  // those in num_below haven't been sweep can be ignored for count_r;
+				count_r -= point_num - idx_below;  // those in num_below haven't been swept can be ignored for count_r;
 				depth = std::min(depth, count_r);  // update depth
-				idx_below = point_num;
-				continue;
+				break;
 			} else if (idx_below == point_num) {  // no more points in num_below
-				count_l -= num_above - idx_above;  // those in num_above haven't been sweep can be ignored for count_l;
+				count_l -= num_above - idx_above;  // those in num_above haven't been swept can be ignored for count_l;
 				depth = std::min(depth, count_l);  // update depth
-				idx_above = num_above;
-				continue;
-			} else
-				orient = m_normalized_dataset[idx_above].y * m_normalized_dataset[idx_below].x
-						- m_normalized_dataset[idx_above].x * m_normalized_dataset[idx_below].y;
+				break;
+			}
 
+			DataType orient = m_normalized_dataset[idx_above].y * m_normalized_dataset[idx_below].x
+						- m_normalized_dataset[idx_above].x * m_normalized_dataset[idx_below].y;
 			if (orient == 0) {  // colinear
 				idx_above++;
 				idx_below++;  // don't need to change the counts
@@ -138,7 +132,7 @@ private:
 				idx_below++;
 				count_r--;
 				count_l++;
-				depth = std::min(depth, count_r); //update depth
+				depth = std::min(depth, count_r);  // update depth
 			} else {  // idx_above,o,idx_below is a left turn
 				idx_above++;
 				count_r++;
@@ -195,7 +189,6 @@ private:
 		for (SizeType i = index + 1; i <= point_num; i++) {
 			m_normalized_dataset[i - 1].x = *(data + i * 2) - x;
 			m_normalized_dataset[i - 1].y = *(data + i * 2 + 1) - y;
-		    //std::cout << "x: " << m_normalized_dataset[i - 1].x << ", y: " << m_normalized_dataset[i - 1].y << std::endl;
 		}
 	}
 
@@ -221,7 +214,7 @@ private:
 		}
 
 		for (SizeType j = i; j < point_num; j++) {  // the jth point can be a zero point
-			while (j < point_num && m_normalized_dataset[j].x == 0 && m_normalized_dataset[j].y == 0) {  //find the fist non-zero
+			while (j < point_num && m_normalized_dataset[j].x == 0 && m_normalized_dataset[j].y == 0) {  // find the fist non-zero
 				j++;
 			}
 			if (j < point_num) {  // exists

@@ -28,7 +28,7 @@ namespace TD {
 template<typename DataType, typename PrecisionType>
 class AbsoluteApx {
 
-typedef std::function<SizeType(const PointSet<PrecisionType>&, const SizeType)> KDSolverType;
+using KDSolverType = std::function<SizeType(const PointSet<PrecisionType>&, const SizeType)>;
 
 public:
 	/* Constructor
