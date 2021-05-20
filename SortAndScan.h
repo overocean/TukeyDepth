@@ -216,9 +216,10 @@ private:
 			}
 		}
 
-		m_normalized_dataset.resize(point_num);  // remove redundant points.
+		SizeType num_origins = m_normalized_dataset.size() - point_num;
+		m_normalized_dataset.resize(point_num);  // remove points at origin.
 
-		return m_normalized_dataset.size() - point_num;
+		return num_origins;
 	}
 
 };
