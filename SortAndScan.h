@@ -70,7 +70,7 @@ private:
 	/* Compare two points pointed to by a and b using the convention that a < b
 	 * iff a is hit first when rotating the positive x-axis counterclockwise
 	 */
-	static bool point2d_lessthan(const Point2D<DataType> &a, const Point2D<DataType> &b) {
+	static bool point2d_lessthan(const Point2D<DataType> &a, const Point2D<DataType> &b) noexcept {
 		if (b.y == 0 && b.x > 0) {  // b is on the positive x-axis
 			return false;
 		} else if (a.y == 0 && a.x > 0) {  // only a is on the positive x-axis
@@ -83,7 +83,7 @@ private:
 	}
 
 	SizeType depthOfOrigin() {
-		SizeType num_origins = remove_origin_points();
+		SizeType num_origins = removeOrigins();
 
 		SizeType point_num = m_normalized_dataset.size();
 
@@ -192,7 +192,7 @@ private:
 		}
 	}
 
-	void normalizeDataset(const std::vector<Point2D<DataType>> &dataset, const Point2D<DataType> &p) {
+	void normalizeDataset(const std::vector<Point2D<DataType>> &dataset, const Point2D<DataType> &p) noexcept {
 
 		// make p the origin of the data set
 		SizeType point_num = dataset.size();
@@ -206,27 +206,19 @@ private:
 		}
 	}
 
-	SizeType remove_origin_points() {
+	SizeType removeOrigins() noexcept {
 		SizeType point_num = m_normalized_dataset.size();
-		SizeType i = 0;
-		while (i < point_num && (m_normalized_dataset[i].x != 0 || m_normalized_dataset[i].y != 0)) {
-			i++;
-		}
-
-		for (SizeType j = i; j < point_num; j++) {  // the jth point can be a zero point
-			while (j < point_num && m_normalized_dataset[j].x == 0 && m_normalized_dataset[j].y == 0) {  // find the fist non-zero
-				j++;
-			}
-			if (j < point_num) {  // exists
-				m_normalized_dataset[i].x = m_normalized_dataset[j].x;
-				m_normalized_dataset[i].y = m_normalized_dataset[j].y;
-				i++;
+		for (SizeType i = 0; i < point_num; ++i) {
+			if (m_normalized_dataset[i].x == 0 && m_normalized_dataset[i].y == 0) {
+				m_normalized_dataset[i] = m_normalized_dataset[point_num - 1];
+				--point_num;
+				--i;
 			}
 		}
 
-		m_normalized_dataset.resize(i);  // remove redundant points.
+		m_normalized_dataset.resize(point_num);  // remove redundant points.
 
-		return point_num - i;
+		return m_normalized_dataset.size() - point_num;
 	}
 
 };
